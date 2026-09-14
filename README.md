@@ -2,7 +2,7 @@
 
 Stress-test a plan in a readable browser questionnaire. Keep the questioning discipline of **grilling** and the vocabulary and decision records of **domain-modeling**, without a wall of terminal questions.
 
-Instruction-only skill. No bundled server, CLI, framework, or runtime scripts. The agent generates self-contained HTML with a little inline JavaScript for answers. Handoffs use **TOON**, not JSON.
+A standalone skill with one small local Python helper and a reusable HTML template. No Lavish, Playwright, framework, or third-party Python packages. Handoffs use **TOON**, not JSON.
 
 ## Install
 
@@ -18,13 +18,41 @@ Or with Bun:
 bunx skills add Hi9841/grill-with-docs-ui
 ```
 
-For manual installation, download or clone this repository and copy the inner `grill-with-docs-ui/` folder into your agent's configured skills directory. Keep `SKILL.md` and `references/` together. The optional `agents/openai.yaml` supplies Codex display metadata; the workflow itself is agent-neutral.
+The repository root is the skill. There is no inner skill folder.
 
-No separate installation of grilling, domain-modeling, grill-with-docs, AXI, or Lavish is needed. Their relevant workflow principles are included here.
+For manual installation, download or clone the repository. Put `SKILL.md`, `scripts/`, `assets/`, `references/`, `agents/`, and `LICENSE` directly inside your agent's configured `skills/grill-with-docs-ui/` directory. Keep these resources together. The optional `agents/openai.yaml` supplies Codex display metadata; the workflow itself is agent-neutral.
+
+Your installed folder should look like this:
+
+```text
+skills/grill-with-docs-ui/
+  SKILL.md
+  scripts/session.py
+  assets/round.html
+  references/
+  agents/openai.yaml
+  LICENSE
+```
+
+For local development, point the agent's skill registration at this repository root. To install the current checkout with the Skills CLI, run `bunx skills add . --skill grill-with-docs-ui` from this directory. Installing from GitHub uses the published version, not uncommitted local edits.
+
+The grilling and domain-modeling guidance is included. No other skill installation is needed.
 
 ### Browser requirements
 
-The skill uses Lavish Editor's existing artifact and polling workflow. It opens the generated page, lets you answer once, and returns Submit feedback to the foreground agent. No Playwright setup or custom browser bridge is needed.
+Python 3.10+ and a modern browser on the same computer as the agent. The agent starts the bundled helper automatically and stays active waiting for submissions. No browser-inspection tool is needed. Remote terminals need an explicitly configured secure port-forward or a browser on their host; plain chat without process/file tools cannot run this skill.
+
+### Updating an older installation
+
+Back up any local customizations, then replace the old installation with the current skill package rather than merging directories. An old outer `SKILL.md` can hide an updated nested copy. Keep only one entrypoint in the installed skill folder.
+
+If the agent still tries to launch `lavish-axi`, check the exact `SKILL.md` path it loaded. The current workflow runs `scripts/session.py serve`, then `scripts/session.py wait`. Verify that the helper exists beside that entrypoint:
+
+```bash
+python "<installed-skill-directory>/scripts/session.py" --version
+```
+
+After replacing an older installation, reload skills or start a fresh agent session so previously loaded instructions are not reused. Installing this skill does not change instructions already held by another running agent.
 
 ## Use it
 
@@ -35,21 +63,21 @@ Ask your agent:
 For agents supporting dollar-prefixed skill invocation, use `$grill-with-docs-ui`.
 
 1. The agent investigates the project and generates one scrollable page containing all currently independent questions. Each includes a recommendation, left unselected.
-2. Answer in the Lavish page and choose **Submit round**. You can give custom answers or defer a question with **Discuss first**. There is nothing to paste or send in chat.
-3. The waiting agent automatically collects and saves the answers, updates agreed terms and qualifying decision records, and opens the next round. Questions that depend on earlier answers wait until those decisions are settled.
+2. Answer in your browser and choose **Submit round**. You can give custom answers or defer a question with **Discuss first**. There is nothing to paste or send in chat.
+3. The helper saves the answers and the waiting agent receives them, updates agreed terms and qualifying decision records, and writes the next round. It opens automatically in the same tab. Questions that depend on earlier answers wait until those decisions are settled.
 
 The interview ends with an explicit confirm-or-revise question, not an assumed agreement.
 
 ## Saving answers
 
-Submit freezes the round and the Lavish poll returns it to the foreground agent, which saves it to your workspace. Keep the poll running during the interview. If it is interrupted, rerun it because Lavish keeps queued feedback.
+Submit freezes the round and saves an immutable TOON snapshot in the session directory. The page confirms saving only after the helper verifies the file. The agent's wait command reads that snapshot without consuming or deleting it. Keep the agent active during the interview; the helper can save answers but cannot wake a stopped agent. Browser drafts are best effort, not a replacement for saved submissions.
 
 Sessions normally live under `.grill-with-docs/<topic>-<unique-suffix>/`:
 
 ```text
 design-tree.md       Decisions, prerequisites, and open branches
-round-1.html         Self-contained question page
-answers-1.toon      Submitted answers saved by the agent
+round-1.html         Question page served by the helper
+answers-1.toon       Submitted answers saved by the helper
 round-2.html         Follow-up questions, when needed
 ```
 
@@ -66,7 +94,7 @@ answers[2]{id,choice,text,deferred}:
   cancellation,"","Explain the refund timing first.",true
 ```
 
-The generated page is served by Lavish for the review session. This is a skill that generates pages, not a hosted web application.
+The helper listens on `127.0.0.1` with a random port and a private session URL. It checks request origins and serves only interview resources, not arbitrary workspace files. The page needs no internet access; it only contacts this local helper. This is not a hosted service. Keep the session URL and answer files private.
 
 ## Design
 
@@ -77,14 +105,27 @@ Large readable text, a single reading column, flat question sections, and quiet 
 ```text
 README.md
 LICENSE
-grill-with-docs-ui/
-  SKILL.md
-  agents/openai.yaml
-  references/
-    domain-docs.md
-    live-session.md
-    page-design.md
+SKILL.md
+agents/openai.yaml
+scripts/session.py
+assets/round.html
+references/
+  domain-docs.md
+  live-session.md
+  page-design.md
+tests/test_package.py
+tests/test_session.py
 ```
+
+## Verification
+
+From the repository root:
+
+```bash
+python -B -m unittest discover -s tests -v
+```
+
+The tests use temporary sessions and the Python standard library. They cover full-text handoff, validation, retry safety, receipt recovery, and request boundaries. Browser behavior also needs a real session check; unit tests alone do not verify keyboard operation or layout.
 
 ## Credits and license
 

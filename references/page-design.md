@@ -24,9 +24,9 @@ Use visible native focus indicators, 44px touch targets, and labels bound to eac
 
 Use one primary button, "Submit round", next to answered progress and a short status. Drafts save automatically; omit a separate Save draft action. A sticky footer is optional: reserve its space and ensure it never obscures the final input or a focused error on small screens or at zoom. An ordinary in-flow footer is safer when space is tight.
 
-After Submit, preserve the question context and display "Submitted. Waiting for the agent." After the agent verifies the saved file, show "Answers saved. Preparing the next round." These are different states, not optimistic success messages. Put routine updates in a stable `role="status"` region. The next page opens in the same tab with its title at the top; the agent continues without a chat prompt.
+Let the helper own Submit feedback: "Saving answers" during the request, then "Answers saved. Waiting for the agent" only after verified persistence. Put updates in the stable `role="status"` region. The next page opens in the same tab with its title at the top; the agent continues without a chat prompt. Do not create a second submit handler or optimistic success state.
 
-Keep TOON and technical status attributes hidden from the normal form. A backup download may appear under recovery details during a connection failure, but is never a required step or a substitute for the automatic handoff.
+Keep TOON out of the normal form. The helper handles storage, receipt, and recovery. Preserve its form hooks when adapting the bundled HTML template.
 
 ## Check the generated page
 

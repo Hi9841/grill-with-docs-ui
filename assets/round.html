@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Booking decisions · Round 1</title>
+  <style>
+    :root { color-scheme: light; --paper: oklch(98% .008 85); --ink: oklch(27% .018 65); --muted: oklch(46% .018 65); --line: oklch(85% .012 85); --accent: oklch(40% .075 175); --selected: oklch(94% .025 175); --error: oklch(44% .16 25); }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 1rem/1.6 ui-sans-serif, system-ui, sans-serif; }
+    main { max-inline-size: 48rem; margin-inline: auto; padding: 3.5rem 1.25rem; }
+    header { margin-block-end: 3rem; }
+    h1 { font: 500 clamp(2rem, 5vw, 2.75rem)/1.15 Georgia, serif; margin: 0 0 1rem; text-wrap: balance; }
+    p { margin: .6rem 0; overflow-wrap: anywhere; }
+    header p { max-inline-size: 60ch; color: var(--muted); }
+    .meta { font-size: .875rem; color: var(--muted); margin-block-start: 1.25rem; }
+    fieldset { border: 0; border-block-end: 1px solid var(--line); margin: 0 0 2.5rem; padding: 0 0 2rem; min-inline-size: 0; }
+    legend { padding: 0; font-size: 1.35rem; font-weight: 600; line-height: 1.35; }
+    .question { margin-block: 1rem .6rem; }
+    .recommendation { color: var(--muted); margin-block-end: 1.25rem; }
+    .recommendation strong { color: var(--accent); font-weight: 600; }
+    .option { display: flex; align-items: start; gap: .8rem; padding: .8rem .5rem; min-block-size: 44px; border-radius: .4rem; cursor: pointer; }
+    .option:has(input:checked) { background: var(--selected); }
+    input[type=radio] { flex-shrink: 0; inline-size: 1.15rem; block-size: 1.15rem; margin: .25rem 0 0; accent-color: var(--accent); }
+    .option span { min-inline-size: 0; overflow-wrap: anywhere; }
+    .option small { display: block; color: var(--muted); font-size: .875rem; }
+    textarea { display: block; inline-size: 100%; min-block-size: 7rem; resize: vertical; margin-block: .5rem 1rem; padding: .75rem; border: 1px solid var(--muted); border-radius: .4rem; font: inherit; color: var(--ink); background: var(--paper); }
+    [data-custom] { padding-block-start: .75rem; }
+    details { margin-block: .5rem; }
+    summary { cursor: pointer; padding-block: .6rem; min-block-size: 44px; color: var(--muted); }
+    button { font: inherit; min-block-size: 44px; cursor: pointer; border-radius: .4rem; }
+    [data-clear] { border: 0; padding: .5rem 0; text-decoration: underline; text-underline-offset: .2em; background: transparent; color: var(--muted); font-size: .875rem; }
+    [type=submit] { background: var(--accent); color: white; border: 0; padding: .8rem 1.5rem; font-weight: 600; }
+    button:disabled { cursor: default; opacity: .65; }
+    [data-error] { color: var(--error); font-size: .875rem; }
+    [data-error]:empty { margin: 0; }
+    footer { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; }
+    #answer-progress { color: var(--muted); font-size: .875rem; font-variant-numeric: tabular-nums; }
+    #session-status { margin-block-start: 1rem; color: var(--muted); font-size: .875rem; }
+    ::selection { background: var(--selected); color: var(--ink); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    @media (forced-colors: active) { :focus-visible { outline-color: Highlight; } }
+    @media (max-width: 30rem) { main { padding-block: 2rem; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Make the booking rules clear.</h1>
+    <p>Two decisions to settle before designing the reservation flow. Choose what fits, or describe a different approach.</p>
+    <p class="meta">Round 1 · Ownership and cancellations</p>
+  </header>
+  <form id="grill-form" novalidate>
+    <fieldset data-question="ownership">
+      <legend>1. Who owns a reservation?</legend>
+      <p class="question">When the person who booked leaves the team, should the reservation stay with the team?</p>
+      <p class="recommendation"><strong>Recommended: team ownership.</strong> Shared bookings remain usable when membership changes.</p>
+      <label class="option"><input id="ownership-team" type="radio" name="ownership" value="team" aria-describedby="ownership-error"><span>The team<small>Any authorized teammate can manage the reservation.</small></span></label>
+      <label class="option"><input id="ownership-person" type="radio" name="ownership" value="person" aria-describedby="ownership-error"><span>The person who booked<small>Leaving the team requires an explicit transfer.</small></span></label>
+      <label class="option"><input id="ownership-custom" type="radio" name="ownership" value="custom" aria-describedby="ownership-error"><span>Write my own answer</span></label>
+      <div data-custom hidden><label for="ownership-text">Your ownership rule</label><textarea id="ownership-text" data-text aria-describedby="ownership-error"></textarea></div>
+      <label class="option"><input id="ownership-discuss" type="radio" name="ownership" value="discuss" aria-describedby="ownership-error"><span>Discuss first</span></label>
+      <details><summary>Add context</summary><label for="ownership-context">Anything else about ownership?</label><textarea id="ownership-context" data-context></textarea></details>
+      <button type="button" data-clear>Clear answer</button>
+      <p id="ownership-error" data-error></p>
+    </fieldset>
+    <fieldset data-question="cancellation">
+      <legend>2. When should cancellation close?</legend>
+      <p class="question">How much notice should someone give before releasing a reserved resource?</p>
+      <p class="recommendation"><strong>Recommended: one day ahead.</strong> Other teams get time to use the opening, but urgent changes need an exception.</p>
+      <label class="option"><input id="cancellation-day" type="radio" name="cancellation" value="day" aria-describedby="cancellation-error"><span>One day before<small>Allow exceptions through the resource manager.</small></span></label>
+      <label class="option"><input id="cancellation-start" type="radio" name="cancellation" value="start" aria-describedby="cancellation-error"><span>Any time before it starts<small>More flexibility, with less notice for other teams.</small></span></label>
+      <label class="option"><input id="cancellation-custom" type="radio" name="cancellation" value="custom" aria-describedby="cancellation-error"><span>Write my own answer</span></label>
+      <div data-custom hidden><label for="cancellation-text">Your cancellation rule</label><textarea id="cancellation-text" data-text aria-describedby="cancellation-error"></textarea></div>
+      <label class="option"><input id="cancellation-discuss" type="radio" name="cancellation" value="discuss" aria-describedby="cancellation-error"><span>Discuss first</span></label>
+      <details><summary>Add context</summary><label for="cancellation-context">Anything else about cancellation?</label><textarea id="cancellation-context" data-context></textarea></details>
+      <button type="button" data-clear>Clear answer</button>
+      <p id="cancellation-error" data-error></p>
+    </fieldset>
+    <footer><button type="submit">Submit round</button><span id="answer-progress">0 of 2 answered</span></footer>
+  </form>
+  <p id="session-status" role="status">Connecting to this session…</p>
+  <noscript>Enable JavaScript to submit your answers.</noscript>
+</main>
+</body>
+</html>
