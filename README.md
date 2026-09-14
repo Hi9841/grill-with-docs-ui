@@ -24,9 +24,7 @@ No separate installation of grilling, domain-modeling, grill-with-docs, AXI, or 
 
 ### Browser requirements
 
-The agent needs workspace file access, a user-visible browser it can read and update, and the ability to keep its turn active while waiting for Submit. Use your agent's existing browser integration. The skill checks that it controls the same tab you are answering in before starting.
-
-The instructions are portable; browser capabilities vary by agent. A plain chat agent or a disconnected HTML preview cannot provide automatic submission. Missing browser setup is reported up front, not replaced with a copy/paste workflow. No named browser package is required by the skill.
+The skill uses Lavish Editor's existing artifact and polling workflow. It opens the generated page, lets you answer once, and returns Submit feedback to the foreground agent. No Playwright setup or custom browser bridge is needed.
 
 ## Use it
 
@@ -37,14 +35,14 @@ Ask your agent:
 For agents supporting dollar-prefixed skill invocation, use `$grill-with-docs-ui`.
 
 1. The agent investigates the project and generates one scrollable page containing all currently independent questions. Each includes a recommendation, left unselected.
-2. Answer in the connected browser and choose **Submit round**. You can give custom answers or defer a question with **Discuss first**. There is nothing to paste or send in chat.
-3. The waiting agent automatically collects and saves the answers, updates agreed terms and qualifying decision records, and opens the next round in the same tab. Questions that depend on earlier answers wait until those decisions are settled.
+2. Answer in the Lavish page and choose **Submit round**. You can give custom answers or defer a question with **Discuss first**. There is nothing to paste or send in chat.
+3. The waiting agent automatically collects and saves the answers, updates agreed terms and qualifying decision records, and opens the next round. Questions that depend on earlier answers wait until those decisions are settled.
 
 The interview ends with an explicit confirm-or-revise question, not an assumed agreement.
 
 ## Saving answers
 
-Browser drafts are best effort. Submit freezes the round and the connected agent saves it to your workspace. The page confirms saving only after the agent verifies the file. Keep the agent running during the interview; if it is interrupted, the page preserves the pending packet where browser storage is available and reports the lost connection. A static HTML file cannot wake a stopped agent.
+Submit freezes the round and the Lavish poll returns it to the foreground agent, which saves it to your workspace. Keep the poll running during the interview. If it is interrupted, rerun it because Lavish keeps queued feedback.
 
 Sessions normally live under `.grill-with-docs/<topic>-<unique-suffix>/`:
 
@@ -68,7 +66,7 @@ answers[2]{id,choice,text,deferred}:
   cancellation,"","Explain the refund timing first.",true
 ```
 
-The generated page makes no network requests. Your agent and its browser integration may still require a connection. This is a skill that generates pages, not a hosted web application.
+The generated page is served by Lavish for the review session. This is a skill that generates pages, not a hosted web application.
 
 ## Design
 

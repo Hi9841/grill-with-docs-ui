@@ -19,19 +19,19 @@ Use AXI's concise TOON convention for agent-facing answer handoffs. Keep this sk
 
 ## Run the interview
 
-Before generating a round, read [references/live-session.md](references/live-session.md) and establish the browser connection it requires. If the environment cannot keep the agent waiting or access the user's tab, explain the missing capability before collecting answers. Ask for the necessary setup; never silently substitute copy/paste, downloads, or a "continue" prompt.
+Before generating a round, read [references/live-session.md](references/live-session.md). Use Lavish Editor's input playbook and review loop for the page. Do not substitute a terminal interview.
 
 1. Inspect project instructions, relevant code, CONTEXT-MAP.md or CONTEXT.md, and relevant decisions. Investigate facts using available tools and permitted delegation. Keep unresolved branches and prerequisites in a session-local `design-tree.md`; pending investigations block only their dependent questions.
 2. Read [references/page-design.md](references/page-design.md) before generating HTML. Create `round-N.html` in a dedicated session folder under the project, normally `.grill-with-docs/<topic>-<unique-suffix>/`. Present the **whole current frontier** in one scrollable page. Give each question a stable ID, number, title, question, recommendation with its reason, and optional choices. Ask dependent questions only after their prerequisites are settled. Preserve earlier round files.
-3. Open the round in the connected, user-visible tab and verify its identity and two-way connection. Keep chat to a brief link and "Answer in the page and select Submit. I'll handle the rest." Remain active in the live-session wait loop; do not end the turn while waiting for answers.
-4. On Submit, automatically read the frozen TOON packet, validate it, and save it to `answers-N.toon` using the normal file-editing tool. Acknowledge only after checking the saved contents. Drafts, unanswered questions, and "Discuss first" are not settled decisions.
+3. Open the round with `npx -y lavish-axi <html-file>` and leave its review session running. Tell the user only to answer in the page and press Submit. Lavish's browser UI carries the response back to the agent.
+4. Run `npx -y lavish-axi poll <html-file>` in the foreground. When feedback arrives, read the complete response, validate the submitted answers, and save them to `answers-N.toon` with normal file tools. Drafts, unanswered questions, and "Discuss first" are not settled decisions.
 5. Read every answer, reconcile contradictions, and update the tree. Before creating or editing a glossary or ADR, read [references/domain-docs.md](references/domain-docs.md) for routing, formats, and the ADR threshold. Capture resolved terms immediately. Generate the next frontier and open it in the same tab when possible. Revisions get new question IDs and reopen dependent decisions. On resume, read the tree and saved answers first.
 
 ## Shape the page
 
 Use one self-contained HTML file with inline CSS and only the JavaScript its interactions need. Put questions directly in semantic HTML; escape text safely instead of injecting markup from answers. No network requests, framework, build step, or JSON question/answer files.
 
-The page-design reference sets the reading layout and accessible controls. The live-session reference defines draft persistence, submission, receipt, and reconnection. Keep transport details out of the questionnaire; the user's normal handoff is one Submit action.
+The page-design reference sets the reading layout and accessible controls. The live-session reference defines the Lavish input playbook handoff. Keep transport details out of the questionnaire; the user's normal handoff is one Submit action.
 
 ## TOON handoff
 
