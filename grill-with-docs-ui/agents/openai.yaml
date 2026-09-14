@@ -1,0 +1,4 @@
+interface:
+  display_name: "Grill with docs UI"
+  short_description: "Browser grilling with automatic TOON handoffs"
+  default_prompt: "Use $grill-with-docs-ui to stress-test my plan in a readable browser questionnaire and automatically save each submitted round."
