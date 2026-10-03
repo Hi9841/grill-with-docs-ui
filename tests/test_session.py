@@ -129,6 +129,17 @@ class SessionTests(unittest.TestCase):
                                                   'ownership.text':'x' * 270000})[0], 400)
         self.assertFalse((self.directory / 'answers-1.toon').exists())
 
+    def test_new_round_and_completion_are_the_only_pages_opened(self):
+        self.assertEqual(session.pages_to_open(set(), ['round-1.html', 'round-2.staging.html']),
+                         ['round-1'])
+        seen = {'round-1'}
+        self.assertEqual(session.pages_to_open(seen, ['round-1.html', 'round-2.html', 'notes.html']),
+                         ['round-2'])
+        self.assertEqual(session.pages_to_open({'round-1', 'round-2', 'complete'},
+                                               ['round-2.html', 'complete.html']), [])
+        self.assertEqual(session.pages_to_open(set(), ['complete.html', 'round-10.html', 'round-2.html']),
+                         ['round-2', 'round-10', 'complete'])
+
     def test_cli_validation_and_version(self):
         for flag in ('-v', '-V', '--version'):
             result = subprocess.run([sys.executable, str(SCRIPT), flag], capture_output=True)

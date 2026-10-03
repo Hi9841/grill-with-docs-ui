@@ -282,6 +282,37 @@ class SessionServer(ThreadingHTTPServer):
         return html.replace('</body>', '<script src="client.js" defer></script></body>')
 
 
+def pages_to_open(seen, names):
+    """Return newly published round or completion tokens, ignoring staging files."""
+    rounds = []
+    complete = False
+    for name in names:
+        if name == 'complete.html':
+            complete = True
+        elif match := re.fullmatch(r'round-([1-9][0-9]*)\.html', name):
+            rounds.append(int(match[1]))
+    fresh = [f'round-{number}' for number in sorted(rounds) if f'round-{number}' not in seen]
+    if complete and 'complete' not in seen:
+        fresh.append('complete')
+    return fresh
+
+
+def watch_published(directory, base, seen, opener, stop, interval=0.5):
+    """Open each round or completion page that appears while the server is running."""
+    while not stop.is_set():
+        try:
+            names = [path.name for path in Path(directory).iterdir()
+                     if path.is_file() and not path.is_symlink()]
+        except OSError:
+            names = []
+        for token in pages_to_open(seen, names):
+            seen.add(token)
+            target = base + ('complete.html' if token == 'complete' else f'{token}.html')
+            if not opener(target):
+                report(status='Open the printed session URL in your browser', url=target)
+        stop.wait(interval)
+
+
 class Handler(BaseHTTPRequestHandler):
     def setup(self):
         super().setup()
@@ -411,9 +442,21 @@ def main():
             server.page(number)
             url = server.base + f'round-{number}.html'
             report(status='ready', url=url, directory=server.directory)
+            names = [path.name for path in server.directory.iterdir()
+                     if path.is_file() and not path.is_symlink()]
+            seen = set(pages_to_open(set(), names))
             if args.open and not webbrowser.open(url):
                 report(status='Open the printed session URL in your browser')
-            server.serve_forever(poll_interval=0.25)
+            stop = threading.Event()
+            watcher = threading.Thread(
+                target=watch_published,
+                args=(server.directory, server.base, seen, webbrowser.open, stop),
+                daemon=True)
+            watcher.start()
+            try:
+                server.serve_forever(poll_interval=0.25)
+            finally:
+                stop.set()
     except KeyboardInterrupt:
         report(status='stopped')
     except (OSError, ValueError) as error:
