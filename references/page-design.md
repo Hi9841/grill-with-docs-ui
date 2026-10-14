@@ -14,7 +14,7 @@ Use the project's palette if appropriate. Without one, start with a warm off-whi
 
 ## Question controls
 
-Use native radio inputs with full-row labels, grouped by a fieldset and legend. Option titles should carry the distinction; add one short sentence only when needed. Prefer a flat option list with subtle separators and a restrained selected background. The outer question is not another card. Leave every choice unselected, including recommendations.
+Use native radio inputs with full-row labels, grouped by a fieldset and legend. Option titles should carry the distinction; add one short sentence only when needed. Prefer a flat option list with subtle separators and a restrained selected background. The outer question is not another card. Put the recommended option first, and word the question so that this option is a direct "yes" to it. Leave every choice unselected, including recommendations.
 
 Include "Write my own answer" and "Discuss first" as mutually exclusive options, not independent checkboxes that can conflict with a selected answer. A custom choice reveals a labeled, required textarea. Put optional elaboration behind a native `details` element labeled "Add context" so empty textareas do not dominate every question. Preserve hidden draft text when switching choices. Provide a quiet "Clear answer" button for resetting the selection.
 
