@@ -4,7 +4,7 @@ Use these formats when recording interview outcomes. Follow the project's existi
 
 ## Glossary
 
-If `CONTEXT-MAP.md` exists, read it to find the relevant bounded context and its glossary. Otherwise use the relevant existing `CONTEXT.md`; create a root glossary only when a resolved term needs recording. Avoid unrelated context files.
+If `GLOSSARY-MAP.md` exists, read it to find the relevant bounded context and its glossary. Otherwise use the relevant existing `GLOSSARY.md`; create a root glossary only when a resolved term needs recording. Avoid unrelated context files.
 
 Record each agreed term immediately, with its meaning and any important boundary or avoided synonym. Challenge conflicts before replacing existing definitions. Keep the glossary about domain language, not implementation plans, feature specifications, or interview notes. Unresolved questions belong in the session's `design-tree.md`.
 

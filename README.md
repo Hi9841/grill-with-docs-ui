@@ -81,7 +81,7 @@ answers-1.toon       Submitted answers saved by the helper
 round-2.html         Follow-up questions, when needed
 ```
 
-Resolved vocabulary goes in the project's `CONTEXT.md` files. An ADR is offered only for a hard-to-reverse, non-obvious decision with a genuine tradeoff. Session files may contain sensitive project details; keep them out of public commits unless intentionally shared.
+Resolved vocabulary goes in the project's `GLOSSARY.md` files. An ADR is offered only for a hard-to-reverse, non-obvious decision with a genuine tradeoff. Session files may contain sensitive project details; keep them out of public commits unless intentionally shared.
 
 Example answer packet:
 
