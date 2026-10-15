@@ -124,6 +124,23 @@ class SessionTests(unittest.TestCase):
         (self.directory / 'round-1.html').write_text(HTML.replace('value="team"', 'value="person"'))
         self.assertEqual(self.request('round-1.html')[0], 400)
 
+    def test_invalid_ids_name_the_id_and_rule(self):
+        with self.assertRaisesRegex(ValueError, r"Option ID '1500ms' in question 'ownership' must match"):
+            session.Questions(HTML.replace('value="team"', 'value="1500ms"'))
+        with self.assertRaisesRegex(ValueError, r"Question ID 'Owner' must match"):
+            session.Questions(HTML.replace('data-question="ownership"', 'data-question="Owner"'))
+
+    def test_check_command_validates_a_page_before_publishing(self):
+        page = self.directory / 'round-2.staging.html'
+        page.write_text(HTML, encoding='utf-8')
+        result = subprocess.run([sys.executable, str(SCRIPT), 'check', str(page)], capture_output=True)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn(b'status: "valid"', result.stdout)
+        page.write_text(HTML.replace('value="team"', 'value="1500ms"'), encoding='utf-8')
+        result = subprocess.run([sys.executable, str(SCRIPT), 'check', str(page)], capture_output=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(b"Option ID '1500ms'", result.stdout)
+
     def test_large_payload_fails_without_save(self):
         self.assertEqual(self.request('submit/1', {'ownership.choice':'custom',
                                                   'ownership.text':'x' * 270000})[0], 400)

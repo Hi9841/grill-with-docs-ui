@@ -29,6 +29,10 @@ def report(**fields):
     print('\n'.join(f"{key}: {quote(value)}" for key, value in fields.items()), flush=True)
 
 
+ID_PATTERN = r"[a-z][a-z0-9-]{0,63}"
+ID_RULE = f"must match {ID_PATTERN}: start with a lowercase letter, then use lowercase letters, digits, or hyphens"
+
+
 class Questions(HTMLParser):
     """Read the generated form's small, explicit contract, not arbitrary HTML inputs."""
     def __init__(self, html):
@@ -49,8 +53,10 @@ class Questions(HTMLParser):
         data = dict(attrs)
         if tag == "fieldset":
             identifier = data.get("data-question", "")
-            if self.current or not re.fullmatch(r"[a-z][a-z0-9-]{0,63}", identifier):
-                raise ValueError("Use flat fieldsets with stable lowercase question IDs")
+            if self.current:
+                raise ValueError(f"Question {identifier!r} is nested in {self.current!r}; use flat fieldsets")
+            if not re.fullmatch(ID_PATTERN, identifier):
+                raise ValueError(f"Question ID {identifier!r} {ID_RULE}")
             if identifier in self.questions:
                 raise ValueError("Duplicate question ID")
             self.current = identifier
@@ -62,8 +68,8 @@ class Questions(HTMLParser):
             value = data.get("value", "")
             if not self.current or data.get("name") != self.current:
                 raise ValueError("Radio names must match their question ID")
-            if not re.fullmatch(r"[a-z][a-z0-9-]{0,63}", value):
-                raise ValueError("Use lowercase option IDs")
+            if not re.fullmatch(ID_PATTERN, value):
+                raise ValueError(f"Option ID {value!r} in question {self.current!r} {ID_RULE}")
             if value in self.questions[self.current] or "checked" in data:
                 raise ValueError("Duplicate or preselected option")
             self.questions[self.current].add(value)
@@ -71,6 +77,14 @@ class Questions(HTMLParser):
     def handle_endtag(self, tag):
         if tag == "fieldset":
             self.current = None
+
+
+def round_schema(html):
+    """Validate a whole round page; return its question schema."""
+    schema = Questions(html).questions
+    if '</body>' not in html or 'id="grill-form"' not in html or 'id="session-status"' not in html:
+        raise ValueError("Round needs grill-form, session-status, and a closing body tag")
+    return schema
 
 
 def packet(session, number, questions, fields):
@@ -273,9 +287,7 @@ class SessionServer(ThreadingHTTPServer):
 
     def page(self, number):
         html = self.file(f"round-{number}.html").read_text(encoding="utf-8")
-        schema = Questions(html).questions
-        if '</body>' not in html or 'id="grill-form"' not in html or 'id="session-status"' not in html:
-            raise ValueError("Round needs grill-form, session-status, and a closing body tag")
+        schema = round_schema(html)
         self.schemas.setdefault(number, schema)
         if self.schemas[number] != schema:
             raise ValueError("Published questions changed; create a new round")
@@ -411,6 +423,8 @@ def main():
     serve = commands.add_parser('serve', help='Serve a session on loopback', allow_abbrev=False)
     serve.add_argument('directory', type=Path)
     serve.add_argument('--open', action='store_true', help='Open the normal browser')
+    check = commands.add_parser('check', help='Validate a round page before publishing it', allow_abbrev=False)
+    check.add_argument('page', type=Path)
     wait = commands.add_parser('wait', help='Wait for a saved round; output full TOON', allow_abbrev=False)
     wait.add_argument('directory', type=Path)
     wait.add_argument('--round', type=int, required=True)
@@ -418,9 +432,13 @@ def main():
     args = parser.parse_args()
     if args.command is None:
         report(bin=Path(__file__).resolve(), status='No session started',
-               help='session.py serve <directory> --open; session.py wait <directory> --round 1')
+               help='session.py check <round.html>; session.py serve <directory> --open; session.py wait <directory> --round 1')
         return
     try:
+        if args.command == 'check':
+            schema = round_schema(args.page.read_text(encoding='utf-8'))
+            report(status='valid', questions=len(schema))
+            return
         if args.command == 'wait':
             if args.round < 1 or not 1 <= args.timeout <= 60:
                 parser.error('Use a positive round and timeout between 1 and 60')
