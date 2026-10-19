@@ -20,9 +20,9 @@ bunx skills add Hi9841/grill-with-docs-ui
 
 The repository root is the skill. There is no inner skill folder.
 
-For manual installation, download or clone the repository. Put `SKILL.md`, `scripts/`, `assets/`, `references/`, `agents/`, and `LICENSE` directly inside your agent's configured `skills/grill-with-docs-ui/` directory. Keep these resources together. The optional `agents/openai.yaml` supplies Codex display metadata; the workflow itself is agent-neutral.
+For manual installation, download or clone the repository. Put `SKILL.md`, `scripts/`, `assets/`, `references/`, `agents/`, and `LICENSE` directly inside your agent's configured `skills/grill-with-docs-ui/` directory. Keep these resources together. The optional `agents/openai.yaml` supplies Codex display metadata. The workflow itself is agent-neutral.
 
-Your installed folder should look like this:
+Make sure that your installed folder looks like this:
 
 ```text
 skills/grill-with-docs-ui/
@@ -40,7 +40,7 @@ The grilling and domain-modeling guidance is included. No other skill installati
 
 ### Browser requirements
 
-Python 3.10+ and a modern browser on the same computer as the agent. The agent starts the bundled helper automatically and stays active waiting for submissions. No browser-inspection tool is needed. Remote terminals need an explicitly configured secure port-forward or a browser on their host; plain chat without process/file tools cannot run this skill.
+Python 3.10+ and a modern browser on the same computer as the agent. The agent starts the bundled helper automatically and stays active waiting for submissions. No browser-inspection tool is needed. Remote terminals need an explicitly configured secure port-forward or a browser on their host. Plain chat without process/file tools cannot run this skill.
 
 ### Updating an older installation
 
@@ -63,14 +63,14 @@ Ask your agent:
 For agents supporting dollar-prefixed skill invocation, use `$grill-with-docs-ui`.
 
 1. The agent investigates the project and generates one scrollable page containing all currently independent questions. Each includes a recommendation, left unselected.
-2. Answer in your browser and choose **Submit round**. You can give custom answers or defer a question with **Discuss first**. There is nothing to paste or send in chat.
+2. Answer in your browser and choose **Submit round**. You can give custom answers or defer a question with **Discuss first**. You do not paste or send text in chat.
 3. The helper saves the answers and the waiting agent receives them, updates agreed terms and qualifying decision records, and writes the next round. It opens automatically in the same tab. Questions that depend on earlier answers wait until those decisions are settled.
 
 The interview ends with an explicit confirm-or-revise question, not an assumed agreement.
 
 ## Saving answers
 
-Submit freezes the round and saves an immutable TOON snapshot in the session directory. The page confirms saving only after the helper verifies the file. The agent's wait command reads that snapshot without consuming or deleting it. Keep the agent active during the interview; the helper can save answers but cannot wake a stopped agent. Browser drafts are best effort, not a replacement for saved submissions.
+Submit freezes the round and saves an immutable TOON snapshot in the session directory. The page confirms saving only after the helper verifies the file. The agent's wait command reads that snapshot without consuming or deleting it. Keep the agent active during the interview. The helper can save answers but cannot wake a stopped agent. Browser drafts are best effort, not a replacement for saved submissions.
 
 Sessions normally live under `.grill-with-docs/<topic>-<unique-suffix>/`:
 
@@ -81,7 +81,7 @@ answers-1.toon       Submitted answers saved by the helper
 round-2.html         Follow-up questions, when needed
 ```
 
-Resolved vocabulary goes in the project's `GLOSSARY.md` files. An ADR is offered only for a hard-to-reverse, non-obvious decision with a genuine tradeoff. Session files may contain sensitive project details; keep them out of public commits unless intentionally shared.
+Resolved vocabulary goes in the project's `GLOSSARY.md` files. An ADR is offered only for a hard-to-reverse, non-obvious decision with a genuine tradeoff. Session files can contain sensitive project details. Do not put them in public commits unless you intend to share them.
 
 Example answer packet:
 
@@ -94,7 +94,7 @@ answers[2]{id,choice,text,deferred}:
   cancellation,"","Explain the refund timing first.",true
 ```
 
-The helper listens on `127.0.0.1` with a random port and a private session URL. It checks request origins and serves only interview resources, not arbitrary workspace files. The page needs no internet access; it only contacts this local helper. This is not a hosted service. Keep the session URL and answer files private.
+The helper listens on `127.0.0.1` with a random port and a private session URL. It checks request origins and serves only interview resources, not arbitrary workspace files. The page needs no internet access. It only connects to this local helper. This is not a hosted service. Keep the session URL and answer files private.
 
 ## Design
 
@@ -125,7 +125,7 @@ From the repository root:
 python -B -m unittest discover -s tests -v
 ```
 
-The tests use temporary sessions and the Python standard library. They cover full-text handoff, validation, retry safety, receipt recovery, and request boundaries. Browser behavior also needs a real session check; unit tests alone do not verify keyboard operation or layout.
+The tests use temporary sessions and the Python standard library. They cover full-text handoff, validation, retry safety, receipt recovery, and request boundaries. Browser behavior also needs a check in a real session. Unit tests alone do not verify keyboard operation or layout.
 
 ## Credits and license
 
